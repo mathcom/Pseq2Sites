@@ -13,6 +13,7 @@ def gelu(x):
     """
     return x * 0.5 * (1.0 + torch.erf(x / math.sqrt(2.0)))
     
+    
 class GeLU(nn.Module):
     """Implementation of the gelu activation function.
         For information: OpenAI GPT's gelu is slightly different (and gives slightly different results):
@@ -26,6 +27,7 @@ class GeLU(nn.Module):
         return gelu(x)
 
 ACT2FN = {"gelu": gelu, "relu": torch.nn.functional.relu}
+
 
 class BertOutput(nn.Module):
     def __init__(self, config):
@@ -41,6 +43,7 @@ class BertOutput(nn.Module):
                
         return hidden_states 
 
+    
 class BertIntermediate(nn.Module):
     def __init__(self, config):
         super(BertIntermediate, self).__init__()
@@ -54,6 +57,7 @@ class BertIntermediate(nn.Module):
         hidden_states = self.dropout(hidden_states)
         return hidden_states
 
+    
 class BertSelfattLayer(nn.Module):
     def __init__(self, config):
         super().__init__()
@@ -65,6 +69,7 @@ class BertSelfattLayer(nn.Module):
         output = self.att(input_tensor, ctx_tensor, ctx_att_mask)
         attention_output = self.output(output, input_tensor)
         return attention_output
+        
         
 class BertAttention(nn.Module):
     def __init__(self, config, ctx_dim=None):
@@ -93,7 +98,6 @@ class BertAttention(nn.Module):
         return x.permute(0, 2, 1, 3)
 
     def forward(self, hidden_states, context, attention_mask=None):
-
         mixed_query_layer = self.query(hidden_states)
         mixed_key_layer = self.key(context)
         mixed_value_layer = self.value(context)
@@ -128,6 +132,7 @@ class BertAttention(nn.Module):
         
         return context_layer, attention_probs 
 
+    
 class BertAttOutput(nn.Module):
     def __init__(self, config):
         super(BertAttOutput, self).__init__()
@@ -137,7 +142,6 @@ class BertAttOutput(nn.Module):
         self.transform_act_fn = ACT2FN[config["architectures"]["hidden_act"]]
 
     def forward(self, hidden_states, input_tensor):
-        
         hidden_states = self.dense(hidden_states)
         hidden_states = self.dropout(hidden_states)
         hidden_states = self.LayerNorm(hidden_states + input_tensor) 
@@ -145,11 +149,21 @@ class BertAttOutput(nn.Module):
         
         return hidden_states
         
+        
 class BertEmbeddings(nn.Module):
     def __init__(self, config):
         super(BertEmbeddings, self).__init__()
-        self.word_embeddings = nn.Embedding(config["comps"]["vocab_size"], config["architectures"]["hidden_size"], padding_idx=0) # (Vocab_size, Hidden_size)
-        self.position_embeddings = nn.Embedding(config["comps"]["max_lengths"], config["architectures"]["hidden_size"], padding_idx=0) # (Max_position, Hidden_size)
+        self.word_embeddings = nn.Embedding(
+            config["comps"]["vocab_size"],
+            config["architectures"]["hidden_size"],
+            padding_idx=0
+        ) # (Vocab_size, Hidden_size)
+        
+        self.position_embeddings = nn.Embedding(
+            config["comps"]["max_lengths"],
+            config["architectures"]["hidden_size"],
+            padding_idx=0
+        ) # (Max_position, Hidden_size)
 
         self.LayerNorm = BertLayerNorm(config["architectures"]["hidden_size"], eps=1e-12)
         self.dropout = nn.Dropout(config["train"]["dropout"])
@@ -168,6 +182,7 @@ class BertEmbeddings(nn.Module):
         
         return embeddings 
 
+    
 class BertCrossattLayer(nn.Module):
     def __init__(self, config):
         super().__init__()
@@ -175,13 +190,11 @@ class BertCrossattLayer(nn.Module):
         self.output = BertAttOutput(config)
 
     def forward(self, input_tensor, ctx_tensor, ctx_att_mask=None):
-
         output, att_probs = self.att(input_tensor, ctx_tensor, ctx_att_mask)
-     
         attention_output = self.output(output, input_tensor)
-
         return attention_output, att_probs
 
+    
 class BertLayer(nn.Module):
     def __init__(self, config):
         super(BertLayer, self).__init__()
@@ -190,7 +203,6 @@ class BertLayer(nn.Module):
         self.output = BertOutput(config) 
     
     def forward(self, hidden_states, attention_mask):
-
         attention_output = self.attention(hidden_states, attention_mask) # (Batch, Max_lengths, Hidden_size)
         intermediate_output = self.intermediate(attention_output) # (Batch, Max_lengths, Intermediate_size)
         layer_output = self.output(intermediate_output, attention_output) # (Batch, Max_lengths, Hidden_size)

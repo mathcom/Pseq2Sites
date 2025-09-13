@@ -18,6 +18,7 @@ def convert_binding_site_to_labels(binding_site, max_length):
     
     return binding_site_labels
     
+    
 def prepare_prots_input(config, datasets, training = True):
     
     # Get features
@@ -43,6 +44,7 @@ def prepare_prots_input(config, datasets, training = True):
         return aa_feat, protein_feat, prots_mask, prot_binding_sites, position_ids, chain_idx
         
     return aa_feat, protein_feat, prots_mask, position_ids, chain_idx
+    
     
 def collate_prots_feats(config, feats, seqs):
 
@@ -86,6 +88,7 @@ def collate_prots_feats(config, feats, seqs):
 
     return aa_feat, protein_feat, input_mask, position_id, chain_idx
 
+
 def convert_bs(pred_binding_sites):
     
     prediction_row, prediction_cols = np.where((pred_binding_sites>0.8) == True)
@@ -110,9 +113,8 @@ def convert_bs(pred_binding_sites):
     
     return final_results
 
+
 def get_results(binding_sites, pred_binding_sites, sequences):
-    from sklearn.metrics import confusion_matrix
-    
     T_TP, T_TN, T_FP, T_FN = 0, 0, 0, 0
     
     for bs, bps, seq in zip(binding_sites, pred_binding_sites, sequences):
@@ -142,7 +144,16 @@ def get_results(binding_sites, pred_binding_sites, sequences):
     F1_score = (2 * precision * recall) / (precision + recall)
     F2_score = (5 * precision * recall) / (4 * precision + recall)
     
-    return np.round(precision,2), np.round(recall,2), np.round(specificity, 2), np.round(ACC, 2), np.round(G_mean, 2), np.round(F1_score, 2), np.round(F2_score, 2)
+    return (
+        np.round(precision,2),
+        np.round(recall,2),
+        np.round(specificity, 2),
+        np.round(ACC, 2),
+        np.round(G_mean, 2),
+        np.round(F1_score, 2),
+        np.round(F2_score, 2)
+    )
+
 
 def get_bs(binding_sites):
     results = list()
