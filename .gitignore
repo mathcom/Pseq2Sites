@@ -4,6 +4,8 @@ __pycache__
 modules/__pycache__
 modules/.ipynb_checkpoints
 
+data
+data/pdbbind
 data/pdbbind/1981-2000
 data/pdbbind/2001-2010
 data/pdbbind/2011-2019
