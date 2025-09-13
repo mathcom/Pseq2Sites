@@ -72,5 +72,5 @@ If you find this work useful for your research, please cite the following paper:
 
 For any questions or feedback, please contact the author:
 
-**Prof. Jonghwan Choi**
+**Jonghwan Choi**
 `jonghwanc@hallym.ac.kr`
